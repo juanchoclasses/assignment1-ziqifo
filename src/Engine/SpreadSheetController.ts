@@ -302,34 +302,38 @@ export class SpreadSheetController {
     this._calculationManager.evaluateSheet(this._memory);
   }
 
-  /**
-   * 
-   * clear the current formula
-   * 
-   */
-  clearFormula(user: string): void {
-    if (!this._contributingUsers.has(user)) {
-      return;
-    }
-    const userEditing = this._contributingUsers.get(user);
-    if (!userEditing) {
-      return;
-    }
-    if (userEditing.cellLabel === '') {
-      return;
-    }
-
-    userEditing.formulaBuilder.setFormula([]);
-    let cellBeingEdited = this._contributingUsers.get(user)?.cellLabel;
-
-    // this should not empty but just in case throw error
-    if (cellBeingEdited) {
-      let cell = this._memory.getCellByLabel(cellBeingEdited);
-      cell.setFormula(userEditing.formulaBuilder.getFormula());
-      this._memory.setCellByLabel(cellBeingEdited, cell);
-    }
-    this._calculationManager.evaluateSheet(this._memory);
+/**
+ * clear the current formula
+ */
+clearFormula(user: string): void {
+  if (!this._contributingUsers.has(user)) {
+    return;
   }
+  const userEditing = this._contributingUsers.get(user);
+  if (!userEditing) {
+    return;
+  }
+
+  if (!userEditing.isEditing) {
+    return;
+  }
+
+  if (userEditing.cellLabel === '') {
+    return;
+  }
+
+  userEditing.formulaBuilder.setFormula([]);
+  let cellBeingEdited = this._contributingUsers.get(user)?.cellLabel;
+
+  // this should not empty but just in case throw error
+  if (cellBeingEdited) {
+    let cell = this._memory.getCellByLabel(cellBeingEdited);
+    cell.setFormula(userEditing.formulaBuilder.getFormula());
+    this._memory.setCellByLabel(cellBeingEdited, cell);
+  }
+  this._calculationManager.evaluateSheet(this._memory);
+}
+
 
   /**
    *  Get the formula as a string
