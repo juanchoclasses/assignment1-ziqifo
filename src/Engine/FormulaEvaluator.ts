@@ -44,8 +44,15 @@ export class FormulaEvaluator {
    */
 
 evaluate(formula: FormulaType) {
+  
   // Initialize error message and result
   this._initializeEvaluation();
+
+  if (formula.length === 2 && formula[0] === '(' && formula[1] === ')') {
+    this._errorMessage = ErrorMessages.missingParentheses;
+    this._result = 0;
+    return;
+  }
 
   // Check for empty formula
   if (this._isEmptyFormula(formula)) return;
@@ -65,18 +72,24 @@ evaluate(formula: FormulaType) {
   this._evaluatePostfix(outputQueue);
 }
 
+
 private _initializeEvaluation() {
   this._errorMessage = "";
   this._result = 0;
 }
 
 private _isEmptyFormula(formula: FormulaType): boolean {
-  if (formula.length === 0) {
+  // Check if the formula contains only parentheses and spaces
+  const isEmpty = formula.every(token => token === '(' || token === ')' || token === ' ');
+  
+  if (isEmpty) {
     this._errorMessage = ErrorMessages.emptyFormula;
     return true;
   }
+  
   return false;
 }
+
 
 private _replaceCellReferencesWithValues(formula: FormulaType): string[] {
   const formulaInValue: string[] = [...formula];
@@ -139,11 +152,15 @@ private _evaluatePostfix(outputQueue: TokenType[]) {
     if (this.isNumber(token)) {
       valueStack.push(Number(token));
     } else {
+      if (valueStack.length < 2) {
+        this._errorMessage = ErrorMessages.invalidFormula;
+        break;
+      }
       const b = valueStack.pop();
       const a = valueStack.pop();
       if (b === undefined || a === undefined) {
         this._errorMessage = ErrorMessages.invalidFormula;
-        return;
+        break;
       }
       switch (token) {
         case '+':
