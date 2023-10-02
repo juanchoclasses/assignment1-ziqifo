@@ -3,9 +3,13 @@ import SheetMemory from "./SheetMemory"
 import { ErrorMessages } from "./GlobalDefinitions";
 
 
-
+/**
+ * Class for evaluating a mathematical formula within a sheet.
+ * It handles errors and references to cell values.
+ */
 export class FormulaEvaluator {
   // Define a function called update that takes a string parameter and returns a number
+  // Class member variables
   private _errorOccured: boolean = false;
   private _errorMessage: string = "";
   private _currentFormula: FormulaType = [];
@@ -13,7 +17,11 @@ export class FormulaEvaluator {
   private _sheetMemory: SheetMemory;
   private _result: number = 0;
 
-
+  /**
+   * Constructor for the FormulaEvaluator class.
+   * 
+   * @param memory - an instance of the SheetMemory class
+   */
   constructor(memory: SheetMemory) {
     this._sheetMemory = memory;
   }
@@ -43,6 +51,12 @@ export class FormulaEvaluator {
     * 
    */
 
+/**
+ * Evaluates a formula.
+ * 
+ * @param formula - the formula to evaluate.
+ * Handles various error cases and sets error messages accordingly.
+ */
 evaluate(formula: FormulaType) {
   
   // Initialize error message and result
@@ -72,12 +86,21 @@ evaluate(formula: FormulaType) {
   this._evaluatePostfix(outputQueue);
 }
 
-
+/**
+ * Initializes the evaluation by resetting error message and result.
+ */
 private _initializeEvaluation() {
   this._errorMessage = "";
   this._result = 0;
 }
 
+/**
+ * Checks if the given formula is empty.
+ * 
+ * @param formula - the formula to check.
+ * 
+ * @returns true if the formula is empty, false otherwise.
+ */
 private _isEmptyFormula(formula: FormulaType): boolean {
   // Check if the formula contains only parentheses and spaces
   const isEmpty = formula.every(token => token === '(' || token === ')' || token === ' ');
@@ -90,7 +113,13 @@ private _isEmptyFormula(formula: FormulaType): boolean {
   return false;
 }
 
-
+/**
+ * Replaces cell references with their values in the given formula.
+ * 
+ * @param formula - the formula to process.
+ * 
+ * @returns a new formula with cell references replaced by their values.
+ */
 private _replaceCellReferencesWithValues(formula: FormulaType): string[] {
   const formulaInValue: string[] = [...formula];
   formula.forEach((token, i) => {
@@ -103,6 +132,13 @@ private _replaceCellReferencesWithValues(formula: FormulaType): string[] {
   return formulaInValue;
 }
 
+/**
+ * Converts an infix expression to a postfix expression.
+ * 
+ * @param formulaInValue - the infix expression.
+ * 
+ * @returns the postfix expression.
+ */
 private _convertToPostfix(formulaInValue: string[]): TokenType[] {
   const operatorStack: TokenType[] = [];
   const outputQueue: TokenType[] = [];
@@ -138,6 +174,13 @@ private _convertToPostfix(formulaInValue: string[]): TokenType[] {
   return outputQueue;
 }
 
+/**
+ * Checks if the formula is a single number.
+ * 
+ * @param outputQueue - the postfix expression.
+ * 
+ * @returns true if the formula is a single number, false otherwise.
+ */
 private _isSingleNumber(outputQueue: TokenType[]): boolean {
   if (outputQueue.length === 1 && this.isNumber(outputQueue[0])) {
     this._result = Number(outputQueue[0]);
@@ -146,6 +189,11 @@ private _isSingleNumber(outputQueue: TokenType[]): boolean {
   return false;
 }
 
+/**
+ * Evaluates a postfix expression.
+ * 
+ * @param outputQueue - the postfix expression.
+ */
 private _evaluatePostfix(outputQueue: TokenType[]) {
   const valueStack: number[] = [];
   for (const token of outputQueue) {
@@ -190,10 +238,16 @@ private _evaluatePostfix(outputQueue: TokenType[]) {
   this._result = valueStack[0];
 }
 
+  /**
+   * Returns the error message if an error occurred.
+   */
   public get error(): string {
     return this._errorMessage
   }
 
+    /**
+   * Returns the result of the formula evaluation.
+   */
   public get result(): number {
     return this._result;
   }
@@ -202,19 +256,22 @@ private _evaluatePostfix(outputQueue: TokenType[]) {
 
 
   /**
+   * Checks if a token can be parsed to a number.
    * 
-   * @param token 
-   * @returns true if the toke can be parsed to a number
+   * @param token - the token to check.
+   * 
+   * @returns true if the token can be parsed to a number, false otherwise.
    */
   isNumber(token: TokenType): boolean {
     return !isNaN(Number(token));
   }
 
   /**
+   * Checks if a token is a cell reference.
    * 
-   * @param token
-   * @returns true if the token is a cell reference
+   * @param token - the token to check.
    * 
+   * @returns true if the token is a cell reference, false otherwise.
    */
   isCellReference(token: TokenType): boolean {
 
